@@ -16,9 +16,11 @@ return new class extends Migration
             $table->foreignId('category_id');
             $table->string('title');
             $table->string('slug')->unique();
-            $table->string('image');
-            $table->float('weight');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('image')->nullable();
+            $table->string('size');
+            $table->unsignedInteger('weight');
+            $table->unsignedBigInteger('price');
+            $table->boolean('is_active')->default(true)->nullable();
             $table->text('description');
             $table->timestamps();
         });
