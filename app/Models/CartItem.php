@@ -16,8 +16,8 @@ class CartItem extends Model
         return $this->belongsTo(Cart::class);
     }
 
-    public function cartItemProductSkus()
+    public function product()
     {
-        return $this->hasMany(CartItemProductSku::class);
+        return $this->belongsTo(Product::class);
     }
 }
