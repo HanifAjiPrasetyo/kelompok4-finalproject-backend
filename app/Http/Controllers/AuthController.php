@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
@@ -45,7 +44,7 @@ class AuthController extends Controller
             'password' => bcrypt(request('password')),
         ]);
 
-        $userAddress = $user->addresses()->create([
+        $userAddress = $user->address()->create([
             'user_id' => $user->id,
             'province' => request('province'),
             'city' => request('city'),
@@ -105,7 +104,11 @@ class AuthController extends Controller
 
     public function me()
     {
-        return response()->json(auth()->user());
+        return response()->json([
+            'success' => true,
+            'data' => auth()->user(),
+            'address' => auth()->user()->address,
+        ]);
     }
 
     /**

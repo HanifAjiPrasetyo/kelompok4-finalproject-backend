@@ -3,6 +3,7 @@
 use App\Http\Controllers\AddressController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 
 /*
@@ -38,4 +39,6 @@ Route::group([
 
 ], function () {
     Route::resource('/product', ProductController::class);
+    Route::resource('/cart', CartController::class);
+    Route::delete('/cart/{cart}/products/{productId}', [CartController::class, 'destroy'])->name('carts.destroy.product');
 });

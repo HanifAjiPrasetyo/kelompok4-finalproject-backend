@@ -40,14 +40,9 @@ class User extends Authenticatable implements JWTSubject
         'password' => 'hashed',
     ];
 
-    public function addresses()
+    public function address()
     {
-        return $this->hasMany(Address::class);
-    }
-
-    public function cart()
-    {
-        return $this->belongsTo(Address::class);
+        return $this->hasOne(Address::class);
     }
 
     /**
