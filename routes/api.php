@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,9 @@ Route::group([
 
 ], function () {
     Route::resource('/product', ProductController::class);
+    Route::resource('/user', UserController::class);
+    Route::get('/getUser', [UserController::class, 'me']);
+    Route::post('/user/updatePassword/{userId}', [UserController::class, 'updatePassword']);
     Route::resource('/cart', CartController::class);
     Route::delete('/cart/{cart}/products/{productId}', [CartController::class, 'destroy'])->name('carts.destroy.product');
 });
