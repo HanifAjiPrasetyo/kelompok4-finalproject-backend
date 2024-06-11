@@ -28,6 +28,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@gmail.com',
             'password' => 'password',
         ]);
+        \App\Models\User::create([
+            'name' => 'Test1',
+            'username' => 'testuser1',
+            'email' => 'user1@gmail.com',
+            'password' => 'password',
+        ]);
 
         $this->call(CategorySeeder::class);
         $this->call(ProductSeeder::class);
