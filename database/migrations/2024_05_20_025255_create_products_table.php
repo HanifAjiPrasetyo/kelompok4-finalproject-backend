@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->string('size');
+            $table->string('year');
             $table->unsignedInteger('weight');
             $table->unsignedBigInteger('price');
             $table->boolean('is_active')->default(true)->nullable();

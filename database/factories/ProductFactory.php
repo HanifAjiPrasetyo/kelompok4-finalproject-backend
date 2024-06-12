@@ -27,6 +27,7 @@ class ProductFactory extends Factory
             'image' => 'http://localhost:8000/images/products/product-1.jpg',
             'size' => fake()->randomElement(['M', 'L', 'XL']),
             'weight' => rand(100, 500),
+            'year' => rand(2015, 2023),
             'price' => rand(100000, 500000),
             'description' => fake()->paragraph(3),
         ];
