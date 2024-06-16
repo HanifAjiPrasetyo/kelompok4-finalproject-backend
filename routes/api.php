@@ -46,6 +46,7 @@ Route::group([
     Route::resource('/user', UserController::class);
     Route::get('/getUser', [UserController::class, 'me']);
     Route::post('/user/updatePassword/{userId}', [UserController::class, 'updatePassword']);
+    Route::post('/user/updateAvatar/{userId}', [UserController::class, 'updateAvatar']);
     Route::post('/user/updateAddress/{userId}', [UserController::class, 'updateAddress']);
     Route::resource('/cart', CartController::class);
     Route::delete('/cart/{cart}/products/{productId}', [CartController::class, 'destroy'])->name('carts.destroy.product');

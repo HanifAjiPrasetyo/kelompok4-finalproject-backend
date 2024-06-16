@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -92,7 +93,6 @@ class UserController extends Controller
                 'email' => $request->email,
                 'name' => $request->name,
                 'phone' => $request->phone,
-                'avatar' => $request->file('avatar'),
             ]);
 
             if ($user->address == null) {
@@ -187,6 +187,42 @@ class UserController extends Controller
                     'success' => true,
                     'message' => "Password has been changed",
                 ]);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+        ], 401);
+    }
+
+    public function updateAvatar(Request $request, $userId)
+    {
+        $user = User::find($userId);
+
+        if ($user->id === auth()->id()) {
+
+            $file = $request->file('avatar');
+
+            if ($file) {
+                if ($file->isValid()) {
+
+                    if ($user->avatar) {
+                        Storage::delete($user->avatar);
+                    }
+
+                    $fileName = $user->username . '.' . explode("/", $file->getClientMimeType())[1];
+                    $filePath = 'http://localhost:8000/storage/images/users/' . $fileName;
+
+                    $file->storeAs('images/users', $fileName);
+
+                    $user->avatar = $filePath;
+                    $user->save();
+
+                    return response()->json([
+                        'message' => 'Avatar updated successfully',
+                        'avatar' => $user->avatar
+                    ]);
+                }
             }
         }
 
