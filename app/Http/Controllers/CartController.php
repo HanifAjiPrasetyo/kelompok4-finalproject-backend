@@ -6,7 +6,6 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Http\Requests\StoreCartRequest;
 use App\Http\Requests\UpdateCartRequest;
-use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
@@ -102,11 +101,6 @@ class CartController extends Controller
         $cartItem = $cart->cartItems()->where('product_id', $productId)->firstOrFail();
         $cartItem->delete();
         $cart->delete();
-
-        // $cart->total_price -= $cartItem->price * $cartItem->quantity;
-        // $cart->total_quantity -= $cartItem->quantity;
-        // $cart->save();
-        // $cartItem->save();
 
         return response()->json(['message' => 'Cart item removed successfully.']);
     }

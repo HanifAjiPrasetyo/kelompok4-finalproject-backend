@@ -46,7 +46,6 @@ class UserController extends Controller
     public function me()
     {
         return response()->json([
-            'success' => true,
             'data' => auth()->user(),
             'address' => auth()->user()->address,
         ]);
@@ -118,6 +117,39 @@ class UserController extends Controller
                 'message' => 'Data has been updated successfully',
                 'data' => $user,
                 'address' => $user->address,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+        ], 401);
+    }
+
+    public function updateAddress(Request $request, $userId)
+    {
+        $user =  User::find($userId);
+
+        if (auth()->id() === $user->id) {
+            if ($user->address == null) {
+                $user->address()->create([
+                    'user_id' => $user->id,
+                    'address_line' => $request->address_line,
+                    'province' => $request->province,
+                    'city' => $request->city,
+                    'postal_code' => $request->postal_code,
+                ]);
+            } else {
+                $user->address()->update([
+                    'address_line' => $request->address_line,
+                    'province' => $request->province,
+                    'city' => $request->city,
+                    'postal_code' => $request->postal_code,
+                ]);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Address has been updated',
+                'data' => $user->address
             ]);
         }
 
