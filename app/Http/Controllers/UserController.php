@@ -52,6 +52,29 @@ class UserController extends Controller
         ]);
     }
 
+    public function admin()
+    {
+        $admin = User::firstWhere('is_admin', true);
+
+        if (!$admin->address) {
+            $admin->address()->create([
+                'user_id' => $admin->id,
+                'province' => "Jawa Timur",
+                'city' => "Kota Blitar",
+            ]);
+        } else {
+            $admin->address()->update([
+                'user_id' => $admin->id,
+                'province' => "Jawa Timur",
+                'city' => "Kota Blitar",
+            ]);
+        }
+
+        return response()->json([
+            'data' => $admin,
+            'address' => $admin->address
+        ]);
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -203,26 +226,22 @@ class UserController extends Controller
 
             $file = $request->file('avatar');
 
-            if ($file) {
-                if ($file->isValid()) {
-
-                    if ($user->avatar) {
-                        Storage::delete($user->avatar);
-                    }
-
-                    $fileName = $user->username . '.' . explode("/", $file->getClientMimeType())[1];
-                    $filePath = 'http://localhost:8000/storage/images/users/' . $fileName;
-
-                    $file->storeAs('images/users', $fileName);
-
-                    $user->avatar = $filePath;
-                    $user->save();
-
-                    return response()->json([
-                        'message' => 'Avatar updated successfully',
-                        'avatar' => $user->avatar
-                    ]);
+            if ($file && $file->isValid()) {
+                if ($user->avatar !== null) {
+                    Storage::delete($user->avatar);
                 }
+
+                $fileName = $user->username . '.' . explode("/", $file->getClientMimeType())[1];
+                $file->storeAs('images/users', $fileName);
+
+                $filePath = 'http://localhost:8000/storage/images/users/' . $fileName;
+                $user->avatar = $filePath;
+                $user->save();
+
+                return response()->json([
+                    'message' => 'Avatar updated successfully',
+                    'avatar' => $user->avatar
+                ]);
             }
         }
 

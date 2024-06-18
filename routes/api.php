@@ -34,7 +34,6 @@ Route::group([
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::post('me', [AuthController::class, 'me']);
 });
 Route::group([
     'middleware' => 'api',
@@ -45,6 +44,7 @@ Route::group([
     Route::post('/getServices', [OrderController::class, 'getServices']);
     Route::resource('/user', UserController::class);
     Route::get('/getUser', [UserController::class, 'me']);
+    Route::get('/getAdmin', [UserController::class, 'admin']);
     Route::post('/user/updatePassword/{userId}', [UserController::class, 'updatePassword']);
     Route::post('/user/updateAvatar/{userId}', [UserController::class, 'updateAvatar']);
     Route::post('/user/updateAddress/{userId}', [UserController::class, 'updateAddress']);

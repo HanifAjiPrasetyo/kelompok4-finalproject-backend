@@ -7,6 +7,8 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
 
 class OrderController extends Controller
 {
@@ -46,7 +48,20 @@ class OrderController extends Controller
 
     public function getServices(Request $request)
     {
-        return response()->json($request->all());
+        // return response()->json($request->all());
+
+        $response = Http::withHeaders([
+            'key' => Config::get('app.rajaongkir_key')
+        ])->post('https://api.rajaongkir.com/starter/cost', [
+            'origin' => $request->origin,
+            'destination' => $request->destination,
+            'weight' => $request->weight,
+            'courier' => $request->courier,
+        ])->json();
+
+        return response()->json([
+            $response['rajaongkir']['results'][0]
+        ]);
     }
 
     /**
