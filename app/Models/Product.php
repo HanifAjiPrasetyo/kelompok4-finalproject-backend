@@ -17,9 +17,14 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function cart()
+    public function cartItems()
     {
-        return $this->belongsTo(CartItem::class);
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
     public function getRouteKeyName()

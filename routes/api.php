@@ -40,6 +40,7 @@ Route::group([
 
 ], function () {
     Route::resource('/product', ProductController::class);
+    Route::get('/getCategories', [ProductController::class, 'getCategories']);
     Route::resource('/order', OrderController::class);
     Route::post('/getServices', [OrderController::class, 'getServices']);
     Route::resource('/user', UserController::class);
