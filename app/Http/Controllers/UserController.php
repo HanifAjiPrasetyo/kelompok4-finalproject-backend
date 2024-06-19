@@ -70,12 +70,6 @@ class UserController extends Controller
                 'province' => "Jawa Timur",
                 'city' => "Kota Blitar",
             ]);
-        } else {
-            $admin->address()->update([
-                'user_id' => $admin->id,
-                'province' => "Jawa Timur",
-                'city' => "Kota Blitar",
-            ]);
         }
 
         return response()->json([
