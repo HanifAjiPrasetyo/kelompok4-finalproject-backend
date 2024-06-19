@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users');
             $table->string('status');
             $table->unsignedFloat('amount', 10, 2);
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

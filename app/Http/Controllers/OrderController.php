@@ -14,6 +14,11 @@ class OrderController extends Controller
 {
     public function __construct()
     {
+        \Midtrans\Config::$serverKey    = config('services.midtrans.serverKey');
+        \Midtrans\Config::$isProduction = config('services.midtrans.isProduction');
+        \Midtrans\Config::$isSanitized  = config('services.midtrans.isSanitized');
+        \Midtrans\Config::$is3ds        = config('services.midtrans.is3ds');
+
         return $this->middleware('auth:api');
     }
     /**
@@ -90,16 +95,49 @@ class OrderController extends Controller
                         'quantity' => $item['quantity'],
                     ]);
                 }
-
-                return response()->json([
-                    'success' => true,
-                    'order' => [
-                        'items' => $order->orderItems,
-                        'user' => $user,
-                        'amount' => $order->amount,
-                    ],
-                ], 201);
             }
+
+            $payload = [
+                'transaction_details' => [
+                    'order_id'     => $order->order_id,
+                    'gross_amount' => $request->amount,
+                ],
+                'customer_details' => [
+                    'first_name' => $order->user->name,
+                    'email'      => $order->user->email,
+                ],
+                'item_details' => [],
+            ];
+
+            $itemDetails = [];
+
+            foreach ($order->orderItems as $item) {
+                $itemDetails[] = [
+                    'id' => $order->order_id,
+                    'name' => $item->product->title,
+                    'price' => $item->product->price,
+                    'quantity' => $item->quantity,
+                    'merchant_name' => "JOE CAPE"
+                ];
+            }
+
+            $payload['item_details'] = $itemDetails;
+
+            $snapToken = \Midtrans\Snap::getSnapToken($payload);
+            $snapUrl = \Midtrans\Snap::getSnapUrl($payload);
+            $order->snap_token = $snapToken;
+            $order->save();
+
+            return response()->json([
+                'status' => 'success',
+                'order' => [
+                    'items' => $order->orderItems,
+                    'user' => $user,
+                    'amount' => $order->amount,
+                    'snap_token' => $order->snap_token,
+                ],
+                'snapUrl' => $snapUrl
+            ], 201);
         }
 
         return response()->json([
