@@ -7,7 +7,9 @@ use App\Http\Resources\ProductResource;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -92,9 +94,54 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, Product $product)
+    public function updateProduct(Request $request, $productId)
     {
-        //
+        if (auth()->user()->is_admin) {
+            $product = Product::find($productId);
+
+            $validator = Validator::make($request->all(), []);
+
+            if ($request->file('image')) {
+                $validator->addRules([
+                    'image' => 'file|image|max:2048'
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json($validator->messages(), 422);
+                }
+
+                Storage::delete($product->image);
+
+                $image = $request->file('image');
+                $imageName = $product->slug . '.' . explode("/", $image->getClientMimeType())[1];
+                $image->storeAs('images/products', $imageName);
+                $imagePath = 'http://localhost:8000/storage/images/products/' . $imageName;
+                $product->image = $imagePath;
+                $product->save();
+            }
+
+            $updated = $product->update([
+                'category_id' => $request->category_id === "null" || !$request->category_id ? $product->category_id : $request->category_id,
+                'title' => $request->title === "null" || !$request->title ? $product->title : $request->title,
+                'size' => $request->size === "null" || !$request->size ? $product->size : $request->size,
+                'price' => $request->price === "null" || !$request->price ? $product->price : $request->price,
+                'weight' => $request->weight === "null" || !$request->weight ? $product->weight : $request->weight,
+                'year' => $request->year === "null" || !$request->year ? $product->year : $request->year,
+                'description' => $request->description === "null" || !$request->description ? $product->description : $request->description,
+            ]);
+
+            if ($updated) {
+                return response()->json([
+                    'message' => 'Product updated successfully',
+                    'product' => $product,
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "Unauthorized"
+        ], 401);
     }
 
     /**
