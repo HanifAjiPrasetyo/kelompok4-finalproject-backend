@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Http\Resources\OrderResource;
+use App\Models\Cart;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -19,23 +22,14 @@ class OrderController extends Controller
         \Midtrans\Config::$isSanitized  = config('services.midtrans.isSanitized');
         \Midtrans\Config::$is3ds        = config('services.midtrans.is3ds');
 
-        return $this->middleware('auth:api');
+        return $this->middleware('auth:api', ['except' => ['index']]);
     }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $order = Order::all();
-
-        return response()->json([
-            'orders' => $order
-        ]);
-    }
-
-    public function userOrders()
-    {
-        $orders = Order::where('user_id', auth()->id())->get();
+        $orders = OrderResource::collection(Order::all());
 
         return response()->json([
             'success' => true,
@@ -128,13 +122,37 @@ class OrderController extends Controller
             $order->snap_token = $snapToken;
             $order->save();
 
+            $products = [];
+
+            foreach ($order->orderItems as $i) {
+                $products[] = [
+                    'quantity' => $i->quantity,
+                    'id' => $i->product->id,
+                    'category' => $i->product->category->name,
+                    'title' => $i->product->title,
+                    'image' => $i->product->image,
+                    'size' => $i->product->size,
+                ];
+            }
+
+            $userCart = Cart::where('user_id', $user->id)->get();
+
+            foreach ($userCart as $item) {
+                $item->cartItems()->delete();
+                $item->delete();
+            }
+
             return response()->json([
                 'status' => 'success',
                 'order' => [
-                    'items' => $order->orderItems,
-                    'user' => $user,
+                    'id' => $order->id,
+                    'order_id' => $order->order_id,
+                    'items' => $products,
+                    'user' => $order->user,
+                    'status' => $order->status,
                     'amount' => $order->amount,
                     'snap_token' => $order->snap_token,
+                    'date' => Carbon::parse($order->created_at)->format('d F Y H:i'),
                 ],
                 'snapUrl' => $snapUrl
             ], 201);
@@ -150,7 +168,6 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
     }
 
     /**
