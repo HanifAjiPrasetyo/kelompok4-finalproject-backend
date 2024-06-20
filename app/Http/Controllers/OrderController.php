@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Cart;
@@ -22,7 +21,7 @@ class OrderController extends Controller
         \Midtrans\Config::$isSanitized  = config('services.midtrans.isSanitized');
         \Midtrans\Config::$is3ds        = config('services.midtrans.is3ds');
 
-        return $this->middleware('auth:api', ['except' => ['index']]);
+        return $this->middleware('auth:api');
     }
     /**
      * Display a listing of the resource.
@@ -47,8 +46,6 @@ class OrderController extends Controller
 
     public function getServices(Request $request)
     {
-        // return response()->json($request->all());
-
         $response = Http::withHeaders([
             'key' => Config::get('app.rajaongkir_key')
         ])->post('https://api.rajaongkir.com/starter/cost', [
@@ -107,7 +104,7 @@ class OrderController extends Controller
 
             foreach ($order->orderItems as $item) {
                 $itemDetails[] = [
-                    'id' => $order->order_id,
+                    'id' => $item->product->slug,
                     'name' => $item->product->title,
                     'price' => $item->product->price,
                     'quantity' => $item->quantity,
@@ -154,13 +151,31 @@ class OrderController extends Controller
                     'snap_token' => $order->snap_token,
                     'date' => Carbon::parse($order->created_at)->format('d F Y H:i'),
                 ],
-                'snapUrl' => $snapUrl
+                'snapUrl' => $snapUrl,
             ], 201);
         }
 
         return response()->json([
             'success' => false,
         ], 401);
+    }
+
+    public function callback($userId)
+    {
+
+        $orders = Order::where(['user_id' => $userId, 'status' => 'pending'])->get();
+
+        $response = [];
+
+        foreach ($orders as $order) {
+            $response[] = Http::withHeaders([
+                'Authorization' => base64_encode(config('services.midtrans.serverKey') . ":"),
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
+        }
+
+        dd($response);
     }
 
     /**

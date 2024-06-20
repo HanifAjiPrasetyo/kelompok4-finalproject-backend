@@ -180,6 +180,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
+            'message' => "Login successful",
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 1000,
