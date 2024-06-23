@@ -44,7 +44,8 @@ Route::group([
     Route::get('/getCategories', [ProductController::class, 'getCategories']);
     Route::resource('/order', OrderController::class);
     Route::post('/getServices', [OrderController::class, 'getServices']);
-    Route::get('/callback/{userId}', [OrderController::class, 'callback']);
+    Route::get('/getMidtransOrders', [OrderController::class, 'getMidtransOrders']);
+    Route::get('/updatePaidOrders/{userId}', [OrderController::class, 'updatePaidOrders']);
     Route::resource('/user', UserController::class);
     Route::get('/getUser', [UserController::class, 'me']);
     Route::get('/getAdmin', [UserController::class, 'admin']);

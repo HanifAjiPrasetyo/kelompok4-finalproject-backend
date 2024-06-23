@@ -42,7 +42,9 @@ class OrderResource extends JsonResource
             'amount' => $this->amount,
             'status' => $this->status,
             'date' => Carbon::parse($this->created_at)->format('d F Y H:i'),
+            'ship_address' => $this->ship_address,
             'snap_token' => $this->snap_token,
+            'snap_url' => $this->snap_url,
         ];
     }
 }

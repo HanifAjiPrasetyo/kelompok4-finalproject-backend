@@ -74,7 +74,8 @@ class OrderController extends Controller
             $order = $user->orders()->create([
                 'order_id' => fake()->uuid(),
                 'user_id' => $user->id,
-                'status' => 'pending',
+                'status' => 'Unpaid',
+                'ship_address' => $request->ship_address,
                 'amount' => $request->amount,
             ]);
 
@@ -117,6 +118,7 @@ class OrderController extends Controller
             $snapToken = \Midtrans\Snap::getSnapToken($payload);
             $snapUrl = \Midtrans\Snap::getSnapUrl($payload);
             $order->snap_token = $snapToken;
+            $order->snap_url = $snapUrl;
             $order->save();
 
             $products = [];
@@ -146,6 +148,7 @@ class OrderController extends Controller
                     'order_id' => $order->order_id,
                     'items' => $products,
                     'user' => $order->user,
+                    'ship_address' => $order->ship_address,
                     'status' => $order->status,
                     'amount' => $order->amount,
                     'snap_token' => $order->snap_token,
@@ -160,22 +163,72 @@ class OrderController extends Controller
         ], 401);
     }
 
-    public function callback($userId)
+    public function getMidtransOrders()
     {
 
-        $orders = Order::where(['user_id' => $userId, 'status' => 'pending'])->get();
+        if (auth()->user()->is_admin) {
+            $orders = Order::where('status', 'pending')->get();
 
-        $response = [];
+            $responses = [];
 
-        foreach ($orders as $order) {
-            $response[] = Http::withHeaders([
-                'Authorization' => base64_encode(config('services.midtrans.serverKey') . ":"),
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
+            foreach ($orders as $order) {
+                $responses[] = Http::withHeaders([
+                    'Authorization' => base64_encode(config('services.midtrans.serverKey') . ":"),
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
+            }
+
+            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] == "200");
         }
 
-        dd($response);
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    public function updatePaidOrders($userId)
+    {
+
+        $user = User::find($userId);
+
+        if (auth()->id() === $user->id) {
+
+            $orders = Order::where(['status' => 'Unpaid', 'user_id' => $user->id])->get();
+
+            $responses = [];
+
+            foreach ($orders as $order) {
+                $responses[] = Http::withHeaders([
+                    'Authorization' => base64_encode(config('services.midtrans.serverKey') . ":"),
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
+            }
+
+            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] === "200");
+
+            $paidIds = [];
+
+            foreach ($paidOrders as $paids) {
+                $paidIds[] = $paids['order_id'];
+            }
+
+            // Update Order Status
+            foreach ($paidIds as $id) {
+                Order::where('order_id', $id)->update([
+                    'status' => 'Paid'
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Orders status updated successfully',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 401);
     }
 
     /**
