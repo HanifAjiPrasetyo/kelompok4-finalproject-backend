@@ -167,7 +167,7 @@ class OrderController extends Controller
     {
 
         if (auth()->user()->is_admin) {
-            $orders = Order::where('status', 'pending')->get();
+            $orders = Order::all();
 
             $responses = [];
 
@@ -179,7 +179,52 @@ class OrderController extends Controller
                 ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
             }
 
-            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] == "200");
+            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] === "200");
+
+            return response()->json([
+                'data' => $paidOrders
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    public function updateOrders()
+    {
+
+        if (auth()->user()->is_admin) {
+            $orders = Order::where('status', 'Unpaid')->get();
+
+            $responses = [];
+
+            foreach ($orders as $order) {
+                $responses[] = Http::withHeaders([
+                    'Authorization' => base64_encode(config('services.midtrans.serverKey') . ":"),
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
+            }
+
+            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] === "200");
+
+            $paidIds = [];
+
+            foreach ($paidOrders as $paids) {
+                $paidIds[] = $paids['order_id'];
+            }
+
+            // Update Order Status
+            foreach ($paidIds as $id) {
+                Order::where('order_id', $id)->update([
+                    'status' => 'Paid'
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Orders status updated successfully',
+            ]);
         }
 
         return response()->json([
@@ -217,13 +262,62 @@ class OrderController extends Controller
             // Update Order Status
             foreach ($paidIds as $id) {
                 Order::where('order_id', $id)->update([
-                    'status' => 'Paid'
+                    'status' => 'Paid',
+                    'snap_token' => null,
+                    'snap_url' => null,
                 ]);
             }
 
             return response()->json([
                 'message' => 'Orders status updated successfully',
             ]);
+        }
+    }
+
+    public function acceptOrder($orderId)
+    {
+        if (auth()->user()->is_admin) {
+            $order = Order::find($orderId);
+
+            if ($order) {
+                $order->update([
+                    'status' => 'Accepted',
+                    'snap_token' => null,
+                    'snap_url' => null,
+                ]);
+
+                return response()->json([
+                    'message' => 'Order has been accepted',
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Order data not found',
+                ], 404);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    public function rejectOrder($orderId)
+    {
+        if (auth()->user()->is_admin) {
+            $order = Order::find($orderId);
+
+            if ($order) {
+                $order->orderItems()->delete();
+                $order->delete();
+
+                return response()->json([
+                    'message' => 'Order has been rejected',
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Order data not found',
+                ], 404);
+            }
         }
 
         return response()->json([

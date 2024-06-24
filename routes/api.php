@@ -45,7 +45,10 @@ Route::group([
     Route::resource('/order', OrderController::class);
     Route::post('/getServices', [OrderController::class, 'getServices']);
     Route::get('/getMidtransOrders', [OrderController::class, 'getMidtransOrders']);
+    Route::get('/updateOrders', [OrderController::class, 'updateOrders']);
     Route::get('/updatePaidOrders/{userId}', [OrderController::class, 'updatePaidOrders']);
+    Route::get('/acceptOrder/{orderId}', [OrderController::class, 'acceptOrder']);
+    Route::get('/rejectOrder/{orderId}', [OrderController::class, 'rejectOrder']);
     Route::resource('/user', UserController::class);
     Route::get('/getUser', [UserController::class, 'me']);
     Route::get('/getAdmin', [UserController::class, 'admin']);
