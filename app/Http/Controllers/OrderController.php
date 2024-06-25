@@ -167,7 +167,7 @@ class OrderController extends Controller
     {
 
         if (auth()->user()->is_admin) {
-            $orders = Order::all();
+            $orders = Order::whereIn('status', ['Paid', 'Accepted'])->get();
 
             $responses = [];
 
@@ -179,11 +179,7 @@ class OrderController extends Controller
                 ])->get("https://api.sandbox.midtrans.com/v2/$order->order_id/status")->json();
             }
 
-            $paidOrders = array_filter($responses, fn ($res) => $res['status_code'] === "200");
-
-            return response()->json([
-                'data' => $paidOrders
-            ]);
+            return response()->json($responses);
         }
 
         return response()->json([

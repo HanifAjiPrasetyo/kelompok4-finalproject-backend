@@ -36,6 +36,81 @@ class ProductController extends Controller
     {
     }
 
+    // Create new Category
+    public function storeCategory(Request $request)
+    {
+        if (auth()->user()->is_admin) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required'
+            ]);
+
+            $categories = Category::all();
+
+            foreach ($categories as $category) {
+                $categoryNames[] = $category->name;
+            }
+
+            if (in_array(ucwords($request->name), $categoryNames)) {
+                $validator->addRules([
+                    'name' => 'unique:categories'
+                ]);
+            }
+
+            if ($validator->fails()) {
+                return response()->json($validator->messages(), 422);
+            }
+
+            $category = Category::create([
+                'name' => ucwords($request->name),
+                'description' => $request->description ?  $request->description : null
+            ]);
+
+            if ($category) {
+                return response()->json([
+                    'message' => 'Category created successfully'
+                ], 201);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "Unauthorized"
+        ], 401);
+    }
+
+    public function updateCategory(Request $request, $categoryId)
+    {
+        if (auth()->user()->is_admin) {
+            $category = Category::find($categoryId);
+
+            $validator = Validator::make($request->all(), []);
+
+            if ($request->name) {
+                $validator->addRules(['name' => 'unique:categories']);
+            }
+
+            if ($validator->fails()) {
+                return response()->json($validator->messages(), 422);
+            }
+
+            $updated = $category->update([
+                'name' => $request->name ? $request->name : $category->name,
+                'description' => $request->description ? $request->description : $category->description
+            ]);
+
+            if ($updated) {
+                return response()->json([
+                    'message' => 'Category updated successfully'
+                ], 201);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "Unauthorized"
+        ], 401);
+    }
+
     public function getCategories()
     {
         return response()->json(Category::all());

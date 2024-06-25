@@ -42,6 +42,7 @@ Route::group([
     Route::resource('/product', ProductController::class);
     Route::post('/product/updateProduct/{productId}', [ProductController::class, 'updateProduct']);
     Route::get('/getCategories', [ProductController::class, 'getCategories']);
+    Route::post('/storeCategory', [ProductController::class, 'storeCategory']);
     Route::resource('/order', OrderController::class);
     Route::post('/getServices', [OrderController::class, 'getServices']);
     Route::get('/getMidtransOrders', [OrderController::class, 'getMidtransOrders']);

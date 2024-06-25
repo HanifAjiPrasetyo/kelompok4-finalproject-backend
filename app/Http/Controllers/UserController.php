@@ -19,14 +19,23 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('address')->get();
 
         if (auth()->user()->is_admin) {
-            return response()->json([
-                'data' => $users,
-                'address' => $users->pluck('address')
-            ]);
+            $users = User::all();
+
+            foreach ($users as $user) {
+                $datas[] = [
+                    'data' => $user,
+                    'address' => $user->address,
+                ];
+            }
+
+            return response()->json($datas);
         }
+
+        return response()->json([
+            'message' => 'Unauthorized',
+        ], 401);
     }
 
     /**
