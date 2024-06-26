@@ -20,7 +20,7 @@ class CategorySeeder extends Seeder
             'name' => 'Jaket'
         ]);
         Category::create([
-            'name' => 'Kaos'
+            'name' => 'Kaos/Kemeja'
         ]);
         Category::create([
             'name' => 'Celana'
