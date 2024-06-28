@@ -29,14 +29,6 @@
         "DB_PORT": "3306",
         "DB_DATABASE": "final_project_backend_sib",
         "DB_USERNAME": "root",
-        "DB_PASSWORD": "",
-        "FILESYSTEM_DISK": "public",
-        "JWT_SECRET": "tO3wpyFQsgru8UzNOk3ZWtiHjrhml84fIXALdDdVKGfv4z9IpGltz5swmZbzMg6z",
-        "RAJAONGKIR_API_KEY": "3d72ada717bf3020aad2fc1d7927ba2c",
-        "MIDTRANS_CLIENT_KEY": "SB-Mid-client-O8joJC5O0SBL7lfg",
-        "MIDTRANS_SERVER_KEY": "SB-Mid-server-SzEhOjSIOmPtKH0gA0ytfdnx",
-        "MIDTRANS_IS_PRODUCTION": "false",
-        "MIDTRANS_IS_SANITIZED": "true",
-        "MIDTRANS_IS_3DS": "true"
+        "DB_PASSWORD": ""
     }
 }
