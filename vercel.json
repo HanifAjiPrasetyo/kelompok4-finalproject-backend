@@ -22,12 +22,6 @@
         "VIEW_COMPILED_PATH": "/tmp",
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie",
-        "DB_CONNECTION": "mysql",
-        "DB_HOST": "127.0.0.1",
-        "DB_PORT": "3306",
-        "DB_DATABASE": "final_project_backend_sib",
-        "DB_USERNAME": "root",
-        "DB_PASSWORD": ""
+        "SESSION_DRIVER": "cookie"
     }
 }
