@@ -219,6 +219,36 @@ class ProductController extends Controller
         ], 401);
     }
 
+    public function updateActiveProduct(Request $request)
+    {
+        if (auth()->user()->is_admin) {
+            $product = Product::find($request->productId);
+
+            if ($request->isChecked == "false") {
+                $product->update([
+                    'is_active' => false,
+                ]);
+
+                return response()->json([
+                    'message' => 'Product has been inactivated',
+                ]);
+            } else {
+                $product->update([
+                    'is_active' => true,
+                ]);
+
+                return response()->json([
+                    'message' => 'Product has been activated',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "Unauthorized"
+        ], 401);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
