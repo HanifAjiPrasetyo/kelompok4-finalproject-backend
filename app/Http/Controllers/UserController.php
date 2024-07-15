@@ -129,28 +129,9 @@ class UserController extends Controller
                 'phone' => $request->phone,
             ]);
 
-            if ($user->address == null) {
-                $user->address()->create([
-                    'user_id' => $user->id,
-                    'address_line' => $request->address_line,
-                    'province' => $request->province,
-                    'city' => $request->city,
-                    'postal_code' => $request->postal_code,
-                ]);
-            } else {
-                $user->address()->update([
-                    'address_line' => $request->address_line,
-                    'province' => $request->province,
-                    'city' => $request->city,
-                    'postal_code' => $request->postal_code,
-                ]);
-            }
-
             return response()->json([
                 'success' => true,
                 'message' => 'Data has been updated successfully',
-                'data' => $user,
-                'address' => $user->address,
             ]);
         }
 

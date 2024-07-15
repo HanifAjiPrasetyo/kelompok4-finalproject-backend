@@ -43,18 +43,9 @@ class AuthController extends Controller
             'password' => bcrypt(request('password')),
         ]);
 
-        $userAddress = $user->address()->create([
-            'user_id' => $user->id,
-            'province' => request('province'),
-            'city' => request('city'),
-            'postal_code' => request('postal_code'),
-        ]);
-
-        if ($user && $userAddress) {
+        if ($user) {
             return response()->json([
                 'success' => true,
-                'user'    => $user,
-                'userAddress' => $userAddress,
             ], 201);
         }
 
